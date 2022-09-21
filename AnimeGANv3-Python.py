@@ -28,13 +28,13 @@ def PreprocessImage(image: np.ndarray[int, np.dtype[np.generic]], x32=True) -> t
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32) / 127.5 - 1.0
     return (image, [width, height])
 
-def SaveImage(convert_image_ndarray: NDArray, width_and_height: tuple[int, int], output_image_path: Path) -> None:
-    convert_image_ndarray = (convert_image_ndarray.squeeze() + 1.0) / 2 * 255
-    convert_image_ndarray = convert_image_ndarray.astype(np.uint8)
-    convert_image_ndarray = cv2.resize(convert_image_ndarray, (width_and_height[0], width_and_height[1]))
-    cv2.imwrite(str(output_image_path), cv2.cvtColor(convert_image_ndarray, cv2.COLOR_RGB2BGR))
+def SaveImage(transform_image_ndarray: NDArray, width_and_height: tuple[int, int], output_image_path: Path) -> None:
+    transform_image_ndarray = (transform_image_ndarray.squeeze() + 1.0) / 2 * 255
+    transform_image_ndarray = transform_image_ndarray.astype(np.uint8)
+    transform_image_ndarray = cv2.resize(transform_image_ndarray, (width_and_height[0], width_and_height[1]))
+    cv2.imwrite(str(output_image_path), cv2.cvtColor(transform_image_ndarray, cv2.COLOR_RGB2BGR))
 
-def ConvertImage(input_dir_path: Path, output_dir_path: Path, onnx_model_type: Literal['H40', 'H50', 'H64']) -> None:
+def TransformImage(input_dir_path: Path, output_dir_path: Path, onnx_model_type: Literal['H40', 'H50', 'H64']) -> None:
 
     # get input image paths
     input_image_paths = [i for i in Path(input_dir_path).glob('**/*.*') if i.suffix.lower() in ('.jpg', '.jpeg', '.png')]
@@ -65,11 +65,11 @@ def ConvertImage(input_dir_path: Path, output_dir_path: Path, onnx_model_type: L
         image_ndarray, width_and_height = LoadImageAsNDArray(input_image_path)
 
         # run inference
-        convert_data = session.run(None, {x: image_ndarray})
+        transform_data = session.run(None, {x: image_ndarray})
 
         # save image
         output_image_path = output_dir_path / input_image_path.name
-        SaveImage(convert_data[0], width_and_height, output_image_path)
+        SaveImage(transform_data[0], width_and_height, output_image_path)
         print(f'Processed image: "{input_image_path}" ({width_and_height[0]}×{width_and_height[1]}) time: {time.time() - start_at:.3f}s')
 
     total_end_at = time.time()
@@ -89,5 +89,5 @@ if __name__ == '__main__':
     output_dir_path: Path = Path(args.OutputDirPath)
     onnx_model_type: Literal['H40', 'H50', 'H64'] = args.onnx_model_type
 
-    # start convert
-    ConvertImage(input_dir_path, output_dir_path, onnx_model_type)
+    # start transform
+    TransformImage(input_dir_path, output_dir_path, onnx_model_type)
