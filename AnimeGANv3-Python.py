@@ -82,7 +82,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('InputDirPath', help='Image directory path of input source')
     parser.add_argument('OutputDirPath', help='Image directory path of output destination')
-    parser.add_argument('--onnx-model-type', choices=['H40', 'H50', 'H64'], default='H40', help='onnx model type (H40, H50, H64)')
+    parser.add_argument('--onnx-model-type', choices=('H40', 'H50', 'H64'), default='H40', help='onnx model type (H40, H50, H64)')
     args = parser.parse_args()
 
     input_dir_path: Path = Path(args.InputDirPath)
